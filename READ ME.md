@@ -10,10 +10,9 @@ The project contains three main parts:
 
 Project Structure
 
-PetStore/
-├── frontend/       # Angular application
-├── backend/        # Spring Boot application
-└── database/       # MySQL schema
+PetStore
+: frontend     # Angular application       :backend       # Spring Boot application
+:database     # MySQL schema
 
 Database Setup
 
