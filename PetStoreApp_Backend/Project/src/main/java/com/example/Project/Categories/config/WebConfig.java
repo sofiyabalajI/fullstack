@@ -14,13 +14,20 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Normalize path for file protocol across Windows and Linux
-        String path = new File(uploadDir).getAbsolutePath().replace("\\", "/");
+        File uploadFolder = new File(uploadDir);
+        if (!uploadFolder.exists()) {
+            uploadFolder.mkdirs(); // Automatically creates the folder on startup
+        }
+
+        String path = uploadFolder.getAbsolutePath().replace("\\", "/");
         if (!path.endsWith("/")) {
             path += "/";
         }
 
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + path);
+                .addResourceLocations(
+                        "file:" + path,          // 1. Serves newly uploaded images from disk
+                        "classpath:/images/"     // 2. Serves all 80 existing images from inside the JAR
+                );
     }
 }
