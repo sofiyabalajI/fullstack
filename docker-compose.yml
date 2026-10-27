@@ -1,0 +1,53 @@
+services:
+  database:
+    image: mysql:8.0
+    container_name: petstore-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: petstore
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Data_Base/data.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./PetStoreApp_Backend/Project
+      dockerfile: Dockerfile
+    container_name: petstore-backend
+    restart: always
+    environment:
+      PORT: 8090
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/petstore?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      FILE_UPLOAD_DIR: /app/uploads
+    ports:
+      - "8090:8090"
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./PetStoreApp_Frontend
+      dockerfile: Dockerfile
+    container_name: petstore-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  backend_uploads:
